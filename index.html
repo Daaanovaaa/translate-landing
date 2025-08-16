@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Translate Newsletter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      text-align: center;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 15px 25px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .note {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌍 Translate This Newsletter</h1>
+  <p>Click the button below to automatically copy the "view this email in your browser" link and open Google Translate in your preferred language.</p>
+
+  <button id="copyAndTranslate">Translate This Email</button>
+
+  <p class="note">After clicking, the link is copied to your clipboard automatically. You can paste it anywhere you like too!</p>
+
+  <script>
+    document.getElementById('copyAndTranslate').addEventListener('click', function() {
+      const urlToTranslate = window.location.href; // Replace with your “view in browser” URL if different
+      // Copy URL to clipboard
+      navigator.clipboard.writeText(urlToTranslate).then(() => {
+        // Open Google Translate with URL pre-filled
+        const translateUrl = 'https://translate.google.com/translate?sl=auto&tl=es&u=' + encodeURIComponent(urlToTranslate);
+        window.open(translateUrl, '_blank');
+      });
+    });
+  </script>
+</body>
+</html>
