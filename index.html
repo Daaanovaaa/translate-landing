@@ -23,6 +23,16 @@
             width: 80%;
             max-width: 500px;
         }
+        #debug {
+            display: none;
+            margin-top: 20px;
+            text-align: left;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            background: #f0f0f0;
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
@@ -42,6 +52,8 @@
     <input type="text" id="url-input" placeholder="Paste the 'View in Browser' URL here">
     <button id="submit-url">Submit URL</button>
 
+    <div id="debug"></div>
+
     <script>
         // Valid language codes for Google Translate
         const validLanguages = ['es', 'fr', 'pt', 'de', 'zh-CN', 'ar', 'hi', 'ja', 'ru'];
@@ -49,12 +61,13 @@
         // Function to build and open Google Translate URL
         function openTranslateURL(lang, url) {
             if (!validLanguages.includes(lang)) {
-                alert('Invalid language selected. Please try another.');
+                alert('Invalid language selected: ' + lang);
                 return;
             }
-            if (!url || url.includes('example.com')) {
-                alert('No valid newsletter URL provided. Please paste the "View in Browser" URL.');
+            if (!url || url.includes('example.com') || !url.startsWith('https://')) {
+                alert('Invalid or missing newsletter URL. Please paste the "View in Browser" URL.');
                 document.getElementById('url-input').style.display = 'block';
+                document.getElementById('url-input').value = url || '';
                 document.getElementById('submit-url').style.display = 'block';
                 return;
             }
@@ -68,25 +81,43 @@
             return urlParams.get(param);
         }
 
+        // Debug logging
+        function logDebug(message) {
+            const debugDiv = document.getElementById('debug');
+            debugDiv.style.display = 'block';
+            debugDiv.innerHTML += `<p>${message}</p>`;
+        }
+
         // Get lang and URL from query parameters
         const lang = getQueryParam('lang');
-        const newsletterUrl = getQueryParam('url') || document.referrer;
+        const newsletterUrl = getQueryParam('url');
 
-        // If lang and URL are provided, attempt translation immediately
-        if (lang && validLanguages.includes(lang) && newsletterUrl && !newsletterUrl.includes('github.io') && !newsletterUrl.includes('example.com')) {
+        // Log parameters for debugging
+        logDebug(`Language: ${lang || 'none'}`);
+        logDebug(`Newsletter URL: ${newsletterUrl || 'none'}`);
+        logDebug(`Referrer: ${document.referrer || 'none'}`);
+
+        // Attempt immediate translation if lang and URL are provided
+        if (lang && newsletterUrl) {
+            logDebug(`Attempting to translate with lang=${lang} and url=${newsletterUrl}`);
             openTranslateURL(lang, newsletterUrl);
-        } else if (lang && validLanguages.includes(lang)) {
-            // Show input field if URL is missing or invalid
+        } else {
+            logDebug('Missing lang or URL, showing input field');
             document.getElementById('url-input').style.display = 'block';
             document.getElementById('submit-url').style.display = 'block';
-            alert('Please paste the "View in Browser" URL from your email and click Submit.');
+            if (!lang) {
+                alert('No language specified. Please select a language or paste the "View in Browser" URL.');
+            } else if (!newsletterUrl) {
+                alert('No newsletter URL provided. Please paste the "View in Browser" URL.');
+            }
         }
 
         // Handle button clicks
         document.querySelectorAll('button[data-lang]').forEach(button => {
             button.addEventListener('click', () => {
                 const lang = button.getAttribute('data-lang');
-                if (newsletterUrl && !newsletterUrl.includes('github.io') && !newsletterUrl.includes('example.com')) {
+                logDebug(`Button clicked for lang=${lang}`);
+                if (newsletterUrl && !newsletterUrl.includes('example.com') && newsletterUrl.startsWith('https://')) {
                     openTranslateURL(lang, newsletterUrl);
                 } else {
                     document.getElementById('url-input').style.display = 'block';
@@ -99,7 +130,8 @@
         // Handle manual URL submission
         document.getElementById('submit-url').addEventListener('click', () => {
             const manualURL = document.getElementById('url-input').value.trim();
-            const selectedLang = lang || getQueryParam('lang') || 'es'; // Default to 'es' if no lang specified
+            const selectedLang = lang || getQueryParam('lang') || 'es'; // Default to 'es'
+            logDebug(`Manual URL submitted: ${manualURL}, lang=${selectedLang}`);
             openTranslateURL(selectedLang, manualURL);
         });
     </script>
