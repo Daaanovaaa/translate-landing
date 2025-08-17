@@ -3,41 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Translate This Newsletter</title>
+    <title>Translate This Newsletter (Mirrored URL Version)</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
-        button {
-            margin: 5px;
-            padding: 10px 15px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        #url-input, #submit-url {
-            display: none;
-            margin: 20px auto;
-            padding: 10px;
-            width: 80%;
-            max-width: 500px;
-        }
-        #debug {
-            display: none;
-            margin-top: 20px;
-            text-align: left;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            background: #f0f0f0;
-            padding: 10px;
-        }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        button { margin: 5px; padding: 10px 15px; font-size: 16px; cursor: pointer; }
+        #url-display { margin: 20px; font-weight: bold; word-break: break-all; color: green; }
+        #error-message { color: red; }
+        #url-input, #submit-url { display: none; margin: 20px auto; padding: 10px; width: 80%; max-width: 500px; }
     </style>
 </head>
 <body>
     <h2>🌍 Translate This Newsletter</h2>
-    <p>Select your language to open a translated version of this newsletter:</p>
+    <p>The mirrored URL from your browser header (referrer):</p>
+    <div id="url-display">Loading...</div>
+    <div id="error-message"></div>
+    <p>If the URL above is correct, select a language below to translate it. If not, paste the full "View in Browser" URL below.</p>
 
     <button data-lang="es">🇪🇸 Español</button>
     <button data-lang="fr">🇫🇷 Français</button>
@@ -49,90 +29,73 @@
     <button data-lang="ja">🇯🇵 日本語</button>
     <button data-lang="ru">🇷🇺 Русский</button>
 
-    <input type="text" id="url-input" placeholder="Paste the 'View in Browser' URL here">
-    <button id="submit-url">Submit URL</button>
-
-    <div id="debug"></div>
+    <input type="text" id="url-input" placeholder="Paste the full 'View in Browser' URL here">
+    <button id="submit-url">Use This URL</button>
 
     <script>
-        // Valid language codes for Google Translate
         const validLanguages = ['es', 'fr', 'pt', 'de', 'zh-CN', 'ar', 'hi', 'ja', 'ru'];
 
-        // Function to build and open Google Translate URL
         function openTranslateURL(lang, url) {
             if (!validLanguages.includes(lang)) {
-                alert('Invalid language selected: ' + lang);
+                alert('Invalid language selected.');
                 return;
             }
-            if (!url || url.includes('example.com') || !url.startsWith('https://')) {
-                alert('Invalid or missing newsletter URL. Please paste the "View in Browser" URL.');
-                document.getElementById('url-input').style.display = 'block';
-                document.getElementById('url-input').value = url || '';
-                document.getElementById('submit-url').style.display = 'block';
+            if (!isValidMailchimpURL(url)) {
+                alert('Invalid URL. Please ensure it is a full Mailchimp "View in Browser" URL.');
                 return;
             }
             const translateURL = `https://translate.google.com/translate?sl=auto&tl=${lang}&u=${encodeURIComponent(url)}&_x_tr_pto=wapp`;
             window.open(translateURL, '_blank');
         }
 
-        // Get query parameters from URL
+        function isValidMailchimpURL(url) {
+            return url.startsWith('https://') && url.includes('campaign-archive.com/') && url.includes('?e=') && url.includes('&u=') && url.includes('&id=');
+        }
+
         function getQueryParam(param) {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get(param);
         }
 
-        // Debug logging
-        function logDebug(message) {
-            const debugDiv = document.getElementById('debug');
-            debugDiv.style.display = 'block';
-            debugDiv.innerHTML += `<p>${message}</p>`;
-        }
-
-        // Get lang and URL from query parameters
+        let newsletterUrl = document.referrer;
         const lang = getQueryParam('lang');
-        const newsletterUrl = getQueryParam('url');
+        const urlDisplay = document.getElementById('url-display');
+        const errorMessage = document.getElementById('error-message');
+        const urlInput = document.getElementById('url-input');
+        const submitUrl = document.getElementById('submit-url');
 
-        // Log parameters for debugging
-        logDebug(`Language: ${lang || 'none'}`);
-        logDebug(`Newsletter URL: ${newsletterUrl || 'none'}`);
-        logDebug(`Referrer: ${document.referrer || 'none'}`);
-
-        // Attempt immediate translation if lang and URL are provided
-        if (lang && newsletterUrl) {
-            logDebug(`Attempting to translate with lang=${lang} and url=${newsletterUrl}`);
-            openTranslateURL(lang, newsletterUrl);
-        } else {
-            logDebug('Missing lang or URL, showing input field');
-            document.getElementById('url-input').style.display = 'block';
-            document.getElementById('submit-url').style.display = 'block';
-            if (!lang) {
-                alert('No language specified. Please select a language or paste the "View in Browser" URL.');
-            } else if (!newsletterUrl) {
-                alert('No newsletter URL provided. Please paste the "View in Browser" URL.');
+        if (newsletterUrl && isValidMailchimpURL(newsletterUrl)) {
+            urlDisplay.textContent = newsletterUrl;
+            if (lang && validLanguages.includes(lang)) {
+                openTranslateURL(lang, newsletterUrl);
             }
+        } else {
+            urlDisplay.textContent = newsletterUrl || 'No URL detected.';
+            errorMessage.textContent = 'The mirrored URL is incomplete or missing. Please paste the full URL from your browser address bar below.';
+            urlInput.style.display = 'block';
+            submitUrl.style.display = 'block';
         }
 
-        // Handle button clicks
         document.querySelectorAll('button[data-lang]').forEach(button => {
             button.addEventListener('click', () => {
-                const lang = button.getAttribute('data-lang');
-                logDebug(`Button clicked for lang=${lang}`);
-                if (newsletterUrl && !newsletterUrl.includes('example.com') && newsletterUrl.startsWith('https://')) {
-                    openTranslateURL(lang, newsletterUrl);
-                } else {
-                    document.getElementById('url-input').style.display = 'block';
-                    document.getElementById('submit-url').style.display = 'block';
-                    alert('Please paste the "View in Browser" URL from your email and click Submit.');
-                }
+                const selectedLang = button.getAttribute('data-lang');
+                openTranslateURL(selectedLang, newsletterUrl);
             });
         });
 
-        // Handle manual URL submission
-        document.getElementById('submit-url').addEventListener('click', () => {
-            const manualURL = document.getElementById('url-input').value.trim();
-            const selectedLang = lang || getQueryParam('lang') || 'es'; // Default to 'es'
-            logDebug(`Manual URL submitted: ${manualURL}, lang=${selectedLang}`);
-            openTranslateURL(selectedLang, manualURL);
+        submitUrl.addEventListener('click', () => {
+            newsletterUrl = urlInput.value.trim();
+            if (isValidMailchimpURL(newsletterUrl)) {
+                urlDisplay.textContent = newsletterUrl;
+                errorMessage.textContent = '';
+                urlInput.style.display = 'none';
+                submitUrl.style.display = 'none';
+                if (lang && validLanguages.includes(lang)) {
+                    openTranslateURL(lang, newsletterUrl);
+                }
+            } else {
+                errorMessage.textContent = 'Invalid URL. Please paste a valid Mailchimp "View in Browser" URL.';
+            }
         });
     </script>
 </body>
