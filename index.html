@@ -62,33 +62,32 @@
             window.open(translateURL, '_blank');
         }
 
-        // Get query parameter from URL
+        // Get query parameters from URL
         function getQueryParam(param) {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get(param);
         }
 
-        // Check for lang parameter and attempt translation immediately
+        // Get lang and URL from query parameters
         const lang = getQueryParam('lang');
-        const referrer = document.referrer;
+        const newsletterUrl = getQueryParam('url') || document.referrer;
 
-        if (lang && validLanguages.includes(lang)) {
-            if (referrer && !referrer.includes('github.io')) {
-                openTranslateURL(lang, referrer);
-            } else {
-                // Show input field for manual URL entry
-                document.getElementById('url-input').style.display = 'block';
-                document.getElementById('submit-url').style.display = 'block';
-                alert('Please paste the "View in Browser" URL from your email and click Submit.');
-            }
+        // If lang and URL are provided, attempt translation immediately
+        if (lang && validLanguages.includes(lang) && newsletterUrl && !newsletterUrl.includes('github.io') && !newsletterUrl.includes('example.com')) {
+            openTranslateURL(lang, newsletterUrl);
+        } else if (lang && validLanguages.includes(lang)) {
+            // Show input field if URL is missing or invalid
+            document.getElementById('url-input').style.display = 'block';
+            document.getElementById('submit-url').style.display = 'block';
+            alert('Please paste the "View in Browser" URL from your email and click Submit.');
         }
 
         // Handle button clicks
         document.querySelectorAll('button[data-lang]').forEach(button => {
             button.addEventListener('click', () => {
                 const lang = button.getAttribute('data-lang');
-                if (referrer && !referrer.includes('github.io')) {
-                    openTranslateURL(lang, referrer);
+                if (newsletterUrl && !newsletterUrl.includes('github.io') && !newsletterUrl.includes('example.com')) {
+                    openTranslateURL(lang, newsletterUrl);
                 } else {
                     document.getElementById('url-input').style.display = 'block';
                     document.getElementById('submit-url').style.display = 'block';
