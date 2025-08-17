@@ -1,62 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Email Translation Helper</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
-    button { padding: 1rem 2rem; margin: 1rem; font-size: 1rem; cursor: pointer; }
-    .lang-btn { margin: 0.3rem; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Translate Email</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #fefefe; color: #333; }
+  h1 { font-size: 1.5em; margin-bottom: 20px; }
+  p { margin-bottom: 30px; }
+  button { padding: 15px 25px; font-size: 1em; background-color: #0077cc; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+  button:hover { background-color: #005fa3; }
+</style>
 </head>
 <body>
-  <h1>🌍 Translate Your Email</h1>
-  <p>Open this page from your "View in Browser" link for best results. Then choose a language and click the button below:</p>
 
-  <!-- Language buttons -->
-  <div id="languages">
-    <button class="lang-btn" data-lang="es">🇪🇸 Español</button>
-    <button class="lang-btn" data-lang="fr">🇫🇷 Français</button>
-    <button class="lang-btn" data-lang="pt">🇵🇹 Português</button>
-    <button class="lang-btn" data-lang="de">🇩🇪 Deutsch</button>
-    <button class="lang-btn" data-lang="zh-CN">🇨🇳 中文</button>
-    <button class="lang-btn" data-lang="ar">🇸🇦 العربية</button>
-    <button class="lang-btn" data-lang="hi">🇮🇳 हिन्दी</button>
-    <button class="lang-btn" data-lang="ja">🇯🇵 日本語</button>
-    <button class="lang-btn" data-lang="ru">🇷🇺 Русский</button>
-  </div>
+<h1>🌍 Translate This Email</h1>
+<p>Click the button below to open your email in your preferred language via Google Translate.</p>
+<button id="translateBtn">Translate Email</button>
 
-  <br>
-  <button id="translateBtn">Translate This Email</button>
+<script>
+  // Get the language from the URL query parameter, default to Spanish
+  const urlParams = new URLSearchParams(window.location.search);
+  const lang = urlParams.get('lang') || 'es';
 
-  <script>
-    // Default language (can change via button click)
-    let selectedLang = 'auto';
+  // Reference the Translate button
+  const translateBtn = document.getElementById('translateBtn');
 
-    // Detect referrer (View-in-Browser URL)
-    let emailUrl = document.referrer || window.location.href;
+  translateBtn.addEventListener('click', () => {
+    // Use document.referrer to get the View in Browser URL
+    const referrerURL = document.referrer;
 
-    // Language button click handling
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        selectedLang = btn.getAttribute('data-lang');
-        alert(`Language set to ${btn.textContent}. Now click "Translate This Email".`);
-      });
-    });
+    if (!referrerURL) {
+      alert("Oops! Please open the email using 'View in Browser' first.");
+      return;
+    }
 
-    // Translate button click
-    document.getElementById('translateBtn').addEventListener('click', () => {
-      // Optional: copy email URL to clipboard
-      navigator.clipboard.writeText(emailUrl).then(() => {
-        console.log('Email URL copied to clipboard');
-      }).catch(() => {
-        console.log('Could not copy URL automatically');
-      });
+    // Build Google Translate URL
+    const translateURL = `https://translate.google.com/translate?sl=auto&tl=${lang}&u=${encodeURIComponent(referrerURL)}&_x_tr_pto=wapp`;
 
-      // Open Google Translate in a new tab
-      const translateUrl = `https://translate.google.com/translate?sl=auto&tl=${selectedLang}&u=${encodeURIComponent(emailUrl)}`;
-      window.open(translateUrl, '_blank');
-    });
-  </script>
+    // Open translated page in new tab
+    window.open(translateURL, "_blank");
+  });
+</script>
+
 </body>
 </html>
