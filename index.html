@@ -3,45 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Translate Email</title>
-<style>
-  body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #fefefe; color: #333; }
-  h1 { font-size: 1.5em; margin-bottom: 20px; }
-  p { margin-bottom: 30px; }
-  button { padding: 15px 25px; font-size: 1em; background-color: #0077cc; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
-  button:hover { background-color: #005fa3; }
-</style>
+<title>Translate This Newsletter</title>
 </head>
 <body>
+<h2>🌍 Translate This Newsletter</h2>
+<p>Select your language to open a translated version of this newsletter:</p>
 
-<h1>🌍 Translate This Email</h1>
-<p>Click the button below to open your email in your preferred language via Google Translate.</p>
-<button id="translateBtn">Translate Email</button>
+<button data-lang="es">🇪🇸 Español</button>
+<button data-lang="fr">🇫🇷 Français</button>
+<button data-lang="pt">🇵🇹 Português</button>
+<button data-lang="de">🇩🇪 Deutsch</button>
+<button data-lang="zh-CN">🇨🇳 中文</button>
+<button data-lang="ar">🇸🇦 العربية</button>
+<button data-lang="hi">🇮🇳 हिन्दी</button>
+<button data-lang="ja">🇯🇵 日本語</button>
+<button data-lang="ru">🇷🇺 Русский</button>
 
 <script>
-  // Get the language from the URL query parameter, default to Spanish
-  const urlParams = new URLSearchParams(window.location.search);
-  const lang = urlParams.get('lang') || 'es';
-
-  // Reference the Translate button
-  const translateBtn = document.getElementById('translateBtn');
-
-  translateBtn.addEventListener('click', () => {
-    // Use document.referrer to get the View in Browser URL
-    const referrerURL = document.referrer;
-
-    if (!referrerURL) {
-      alert("Oops! Please open the email using 'View in Browser' first.");
-      return;
-    }
-
-    // Build Google Translate URL
-    const translateURL = `https://translate.google.com/translate?sl=auto&tl=${lang}&u=${encodeURIComponent(referrerURL)}&_x_tr_pto=wapp`;
-
-    // Open translated page in new tab
-    window.open(translateURL, "_blank");
-  });
+// Function to open Google Translate with the referrer URL
+document.querySelectorAll('button').forEach(button => {
+    button.addEventListener('click', () => {
+        const lang = button.getAttribute('data-lang');
+        // Use the page they came from (referrer)
+        const referrer = document.referrer;
+        if (!referrer) {
+            alert("Please open this page from the 'View in Browser' link in your email.");
+            return;
+        }
+        // Build Google Translate URL
+        const translateURL = `https://translate.google.com/translate?sl=auto&tl=${lang}&u=${encodeURIComponent(referrer)}&_x_tr_pto=wapp`;
+        // Open in new tab
+        window.open(translateURL, '_blank');
+    });
+});
 </script>
-
 </body>
 </html>
