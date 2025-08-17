@@ -1,41 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Translate This Newsletter</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translate This Newsletter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #url-input {
+            display: none;
+            margin: 20px auto;
+            padding: 10px;
+            width: 80%;
+            max-width: 500px;
+        }
+    </style>
 </head>
 <body>
-<h2>🌍 Translate This Newsletter</h2>
-<p>Select your language to open a translated version of this newsletter:</p>
+    <h2>🌍 Translate This Newsletter</h2>
+    <p>Select your language to open a translated version of this newsletter:</p>
 
-<button data-lang="es">🇪🇸 Español</button>
-<button data-lang="fr">🇫🇷 Français</button>
-<button data-lang="pt">🇵🇹 Português</button>
-<button data-lang="de">🇩🇪 Deutsch</button>
-<button data-lang="zh-CN">🇨🇳 中文</button>
-<button data-lang="ar">🇸🇦 العربية</button>
-<button data-lang="hi">🇮🇳 हिन्दी</button>
-<button data-lang="ja">🇯🇵 日本語</button>
-<button data-lang="ru">🇷🇺 Русский</button>
+    <button data-lang="es">🇪🇸 Español</button>
+    <button data-lang="fr">🇫🇷 Français</button>
+    <button data-lang="pt">🇵🇹 Português</button>
+    <button data-lang="de">🇩🇪 Deutsch</button>
+    <button data-lang="zh-CN">🇨🇳 中文</button>
+    <button data-lang="ar">🇸🇦 العربية</button>
+    <button data-lang="hi">🇮🇳 हिन्दी</button>
+    <button data-lang="ja">🇯🇵 日本語</button>
+    <button data-lang="ru">🇷🇺 Русский</button>
 
-<script>
-// Function to open Google Translate with the referrer URL
-document.querySelectorAll('button').forEach(button => {
-    button.addEventListener('click', () => {
-        const lang = button.getAttribute('data-lang');
-        // Use the page they came from (referrer)
-        const referrer = document.referrer;
-        if (!referrer) {
-            alert("Please open this page from the 'View in Browser' link in your email.");
-            return;
+    <input type="text" id="url-input" placeholder="Paste the 'View in Browser' URL here">
+    <button id="submit-url" style="display: none;">Submit URL</button>
+
+    <script>
+        // Valid language codes for Google Translate
+        const validLanguages = ['es', 'fr', 'pt', 'de', 'zh-CN', 'ar', 'hi', 'ja', 'ru'];
+
+        // Function to build and open Google Translate URL
+        function openTranslateURL(lang, url) {
+            if (!validLanguages.includes(lang)) {
+                alert('Invalid language selected. Please try another.');
+                return;
+            }
+            if (!url) {
+                alert('No valid newsletter URL provided.');
+                return;
+            }
+            const translateURL = `https://translate.google.com/translate?sl=auto&tl=${lang}&u=${encodeURIComponent(url)}&_x_tr_pto=wapp`;
+            window.open(translateURL, '_blank');
         }
-        // Build Google Translate URL
-        const translateURL = `https://translate.google.com/translate?sl=auto&tl=${lang}&u=${encodeURIComponent(referrer)}&_x_tr_pto=wapp`;
-        // Open in new tab
-        window.open(translateURL, '_blank');
-    });
-});
-</script>
+
+        // Handle button clicks
+        document.querySelectorAll('button[data-lang]').forEach(button => {
+            button.addEventListener('click', () => {
+                const lang = button.getAttribute('data-lang');
+                const referrer = document.referrer;
+
+                if (referrer) {
+                    openTranslateURL(lang, referrer);
+                } else {
+                    // Show input field for manual URL entry
+                    const urlInput = document.getElementById('url-input');
+                    const submitButton = document.getElementById('submit-url');
+                    urlInput.style.display = 'block';
+                    submitButton.style.display = 'block';
+                    alert("Please paste the 'View in Browser' URL from your email and click Submit.");
+
+                    // Handle manual URL submission
+                    submitButton.onclick = () => {
+                        const manualURL = urlInput.value.trim();
+                        if (manualURL) {
+                            openTranslateURL(lang, manualURL);
+                        } else {
+                            alert('Please enter a valid URL.');
+                        }
+                    };
+                }
+            });
+        });
+    </script>
 </body>
 </html>
