@@ -2,30 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Translate This Newsletter</title>
+  <title>Email Translation Helper</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
+    button { padding: 1rem 2rem; margin: 1rem; font-size: 1rem; cursor: pointer; }
+  </style>
 </head>
 <body>
-  <h1>🌍 Translate This Newsletter</h1>
-  <p>Click the button below to translate the email in your preferred language.</p>
+  <h1>🌍 Translate Your Email</h1>
+  <p>Open this page from your "View in Browser" link for best results. Then click the button below:</p>
+
   <button id="translateBtn">Translate This Email</button>
 
   <script>
-    // Get language from URL, default to auto
+    // Detect referrer (View-in-Browser URL)
+    let emailUrl = document.referrer || window.location.href;
+
+    // Read language from ?lang= query parameter
     const urlParams = new URLSearchParams(window.location.search);
-    const lang = urlParams.get('lang') || 'auto';
+    let selectedLang = urlParams.get('lang') || 'auto';
 
-    const btn = document.getElementById('translateBtn');
-    btn.addEventListener('click', () => {
-      // Mailchimp view-in-browser link
-      const archiveUrl = "*|ARCHIVE|*";
+    // Translate button click
+    document.getElementById('translateBtn').addEventListener('click', () => {
+      // Optional: copy email URL to clipboard
+      navigator.clipboard.writeText(emailUrl).catch(() => {});
 
-      // Copy to clipboard
-      navigator.clipboard.writeText(archiveUrl).then(() => {
-        console.log("View in browser link copied!");
-      });
-
-      // Open Google Translate in selected language
-      const translateUrl = `https://translate.google.com/translate?sl=auto&tl=${lang}&u=${encodeURIComponent(archiveUrl)}`;
+      // Open Google Translate in a new tab
+      const translateUrl = `https://translate.google.com/translate?sl=auto&tl=${selectedLang}&u=${encodeURIComponent(emailUrl)}`;
       window.open(translateUrl, '_blank');
     });
   </script>
