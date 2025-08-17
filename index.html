@@ -16,7 +16,7 @@
             font-size: 16px;
             cursor: pointer;
         }
-        #url-input {
+        #url-input, #submit-url {
             display: none;
             margin: 20px auto;
             padding: 10px;
@@ -40,7 +40,7 @@
     <button data-lang="ru">🇷🇺 Русский</button>
 
     <input type="text" id="url-input" placeholder="Paste the 'View in Browser' URL here">
-    <button id="submit-url" style="display: none;">Submit URL</button>
+    <button id="submit-url">Submit URL</button>
 
     <script>
         // Valid language codes for Google Translate
@@ -52,41 +52,56 @@
                 alert('Invalid language selected. Please try another.');
                 return;
             }
-            if (!url) {
-                alert('No valid newsletter URL provided.');
+            if (!url || url.includes('example.com')) {
+                alert('No valid newsletter URL provided. Please paste the "View in Browser" URL.');
+                document.getElementById('url-input').style.display = 'block';
+                document.getElementById('submit-url').style.display = 'block';
                 return;
             }
             const translateURL = `https://translate.google.com/translate?sl=auto&tl=${lang}&u=${encodeURIComponent(url)}&_x_tr_pto=wapp`;
             window.open(translateURL, '_blank');
         }
 
+        // Get query parameter from URL
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Check for lang parameter and attempt translation immediately
+        const lang = getQueryParam('lang');
+        const referrer = document.referrer;
+
+        if (lang && validLanguages.includes(lang)) {
+            if (referrer && !referrer.includes('github.io')) {
+                openTranslateURL(lang, referrer);
+            } else {
+                // Show input field for manual URL entry
+                document.getElementById('url-input').style.display = 'block';
+                document.getElementById('submit-url').style.display = 'block';
+                alert('Please paste the "View in Browser" URL from your email and click Submit.');
+            }
+        }
+
         // Handle button clicks
         document.querySelectorAll('button[data-lang]').forEach(button => {
             button.addEventListener('click', () => {
                 const lang = button.getAttribute('data-lang');
-                const referrer = document.referrer;
-
-                if (referrer) {
+                if (referrer && !referrer.includes('github.io')) {
                     openTranslateURL(lang, referrer);
                 } else {
-                    // Show input field for manual URL entry
-                    const urlInput = document.getElementById('url-input');
-                    const submitButton = document.getElementById('submit-url');
-                    urlInput.style.display = 'block';
-                    submitButton.style.display = 'block';
-                    alert("Please paste the 'View in Browser' URL from your email and click Submit.");
-
-                    // Handle manual URL submission
-                    submitButton.onclick = () => {
-                        const manualURL = urlInput.value.trim();
-                        if (manualURL) {
-                            openTranslateURL(lang, manualURL);
-                        } else {
-                            alert('Please enter a valid URL.');
-                        }
-                    };
+                    document.getElementById('url-input').style.display = 'block';
+                    document.getElementById('submit-url').style.display = 'block';
+                    alert('Please paste the "View in Browser" URL from your email and click Submit.');
                 }
             });
+        });
+
+        // Handle manual URL submission
+        document.getElementById('submit-url').addEventListener('click', () => {
+            const manualURL = document.getElementById('url-input').value.trim();
+            const selectedLang = lang || getQueryParam('lang') || 'es'; // Default to 'es' if no lang specified
+            openTranslateURL(selectedLang, manualURL);
         });
     </script>
 </body>
